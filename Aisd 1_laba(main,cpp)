@@ -1,0 +1,22 @@
+int main() {
+    // Пример использования с типом char
+    setlocale(LC_ALL, "ru");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    Image<short> img2(5, 5, false);
+    Image<short> img3(5, 5, false);
+    img2.drawFilledCircle(2, 2, 1, 5);
+    img2.PixelImage(img2);
+    short i = 32000;
+    Image<short> new_img2 = img2 + i;
+    cout << new_img2;
+    Image<short> new_img22 = new_img2 + 763;
+    Image<short> new_img3 = img2 + img3;
+
+   
+    cout << new_img22;
+    cout << new_img3;
+ 
+
+    return 0;
+};
