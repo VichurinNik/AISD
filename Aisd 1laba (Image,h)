@@ -14,7 +14,18 @@ private:
     size_t _width;    // Ширина изображения
     size_t _height;   // Высота изображения
     T** data;
+
+    // Функция для рисования горизонтальной линии
+    void drawHorizontalLine(int x1, int y, int length, T value)
+    {
+        for (int x = x1; x < x1 + length; ++x) {
+            /*setPixel(x, y, value);*/
+            (*this)(y, x) = value;
+        }
+    }
+
 public:
+
     Image(size_t width, size_t height, bool random_fill) : _width(width), _height(height)
     {
 
@@ -23,7 +34,7 @@ public:
 
             std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(0, 5000);
+            std::uniform_real_distribution<> dis(0, 50);
 
             data = new T * [_height];
             for (size_t i = 0; i < _height; ++i)
@@ -138,13 +149,29 @@ public:
         return data[row][col];
     }
 
-
     // Операторы умножения и сложения для других типов
     template <typename T>
     Image<T>& operator*(const Image<T>& other) {
         if (_width != other._width || _height != other._height)
         {
-            throw runtime_error("Dimensions do not match");
+            Image<T>* result = new Image<T>(other._width, other._height);
+
+            for (size_t i = 0; i < other._height; ++i)
+            {
+                for (size_t j = 0; j < other._width; ++j)
+                {
+                    if (i >= this->_height || j >= this->_width)
+                    {
+                        (*result)(i, j) = other(i, j);
+                    }
+                    else
+                    {
+                        (*result)(i, j) = (*this)(i, j) + other(i, j);
+                    }
+                }
+            }
+
+            return *result;
         }
 
         Image<T>* result = new Image<T>(_width, _height);
@@ -152,42 +179,60 @@ public:
         {
             for (size_t j = 0; j < _width; ++j)
             {
-                (*result)(i, j) = data[i][j] * other(i, j);  // Поэлементное умножение
+                (*result)(i, j) = (*this)(i, j) * other(i, j);  // Поэлементное умножение
             }
         }
         return *result;
     }
 
-    Image<T>& operator!()
+  const  Image<T>& operator!()
     {
         Image<T>* result = new Image<T>(_width, _height);
         for (size_t i = 0; i < _height; ++i)
         {
             for (size_t j = 0; j < _width; ++j)
             {
-                (*result)(i, j) = !(data[i][j]);
+                (*result)(i, j) = -((*this)(i, j));
             }
-            return *result;
         }
+        return *result;
     }
 
     template <typename T>
     Image<T>& operator+(const Image<T>& other)
     {
-        if (_width != other._width || _height != other._height) {
-            throw runtime_error("Dimensions do not match");
+        if (_width != other._width || _height != other._height)
+        {
+            Image<T>* result = new Image<T>(other._width, other._height);
+
+            for (size_t i=0 ; i < other._height; ++i)
+            {
+                for (size_t j=0 ; j < other._width; ++j)
+                {
+                    if (i >= this->_height || j >= this->_width)
+                    {
+                        (*result)(i, j) = other(i, j);
+                    }
+                    else
+                    {
+                        (*result)(i, j) = (*this)(i, j) + other(i, j);
+                    }
+                }
+            }
+
+            return *result;
         }
 
         Image<T>* result = new Image<T>(_width, _height);
         for (size_t i = 0; i < _height; ++i) {
             for (size_t j = 0; j < _width; ++j) {
-                (*result)(i, j) = data[i][j] + other(i, j);  // Поэлементное сложение
+                (*result)(i, j) = (*this)(i, j) + other(i, j);  // Поэлементное сложение
             }
         }
         return *result;
     }
 
-    Image<bool>& operator*(const Image<bool>& other) {
+   const Image<bool>& operator*(const Image<bool>& other) {
         if (_width != other._width || _height != other._height)
         {
             throw runtime_error("Dimensions do not match");
@@ -198,13 +243,13 @@ public:
         {
             for (size_t j = 0; j < _width; ++j)
             {
-                (*result)(i, j) = data[i][j] && other(i, j);  // Поэлементное И
+                (*result)(i, j) = (*this)(i, j) && other(i, j);  // Поэлементное И
             }
         }
         return *result;
     }
 
-    Image<bool>& operator+(const Image<bool>& other)
+   const Image<bool>& operator+(const Image<bool>& other)
     {
         if (_width != other._width || _height != other._height)
         {
@@ -216,14 +261,14 @@ public:
         {
             for (size_t j = 0; j < _width; ++j)
             {
-                (*result)(i, j) = data[i][j] || other(i, j);  // Поэлементное ИЛИ
+                (*result)(i, j) = (*this)(i, j) || other(i, j);  // Поэлементное ИЛИ
             }
         }
         return *result;
     }
 
     // Операторы умножения и сложения изображения на константу
-    Image<T>& operator*(T value) {
+   const Image<T>& operator*(T value) {
         Image<T>* result = new Image<T>(_width, _height);
         for (size_t i = 0; i < _height; ++i) {
             for (size_t j = 0; j < _width; ++j)
@@ -244,7 +289,7 @@ public:
         return *result;
     }
 
-    Image<T>& operator+(T value) {
+   const Image<T>& operator+(T value) {
         Image<T>* result = new Image<T>(_width, _height);
         for (size_t i = 0; i < _height; ++i)
         {
@@ -267,6 +312,27 @@ public:
         }
         return *result;
     }
+
+   // Вычисление коэффициента заполнения изображения
+   double getFillRatio() const 
+   {
+       double sum = 0;
+       for (size_t i = 0; i < _height; ++i)
+       {
+           for (size_t j = 0; j < _width; ++j)
+           {
+               sum += (*this)(i,j);
+           }
+       }
+
+       double totalPixels = _width * _height;
+
+       double sizepix = (totalPixels * std::numeric_limits<T>::max());
+
+       double fillRatio = sum / (totalPixels * std::numeric_limits<T>::max());
+
+       return fillRatio;
+   }
 
     //Алгоритм Брезенхема
     void drawFilledCircle(int cx, int cy, int radius, T fillValue)
@@ -293,22 +359,6 @@ public:
                 y--;
             }
             x++;
-        }
-    }
-
-    // Функция для рисования горизонтальной линии
-    void drawHorizontalLine(int x1, int y, int length, T value)
-    {
-        for (int x = x1; x < x1 + length; ++x) {
-            setPixel(x, y, value);
-        }
-    }
-
-    // Установка пикселя
-    void setPixel(int x, int y, T value) {
-        if (x >= 0 && x < _width && y >= 0 && y < _height)
-        {
-            data[y][x] = value;
         }
     }
 
@@ -343,6 +393,11 @@ ostream& operator<<(ostream& stream, const Image<T> img)
         {
             stream << img(i, j) << ' ';
         }
+        stream << '\n';
+    }
+    return stream;
+};
+
         stream << '\n';
     }
     return stream;
