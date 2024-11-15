@@ -1,22 +1,44 @@
+#include"Image.h"
+#include<Windows.h>
+
+
+
+
 int main() {
     // Пример использования с типом char
     setlocale(LC_ALL, "ru");
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
-    Image<short> img2(5, 5, false);
-    Image<short> img3(5, 5, false);
-    img2.drawFilledCircle(2, 2, 1, 5);
-    img2.PixelImage(img2);
-    short i = 32000;
-    Image<short> new_img2 = img2 + i;
-    cout << new_img2;
-    Image<short> new_img22 = new_img2 + 763;
-    Image<short> new_img3 = img2 + img3;
 
-   
-    cout << new_img22;
-    cout << new_img3;
- 
+    //Вычисление коэффициента заполнения изображения
+    //Пример работы operator!
+    /*Image<short> img3(5, 5, true);
+    cout << img3 << endl;
+    cout << img3.getFillRatio() << endl;
+    cout << !img3 << endl;*/
+
+   // Умножение матриц разного размера
+   /* Image<short> img1(2, 2, true);
+    Image<short> img2(3, 3, true);
+    cout << img1 << endl;
+    cout << img2 << endl;
+    Image<short> img3= img1*img2;
+     cout << img3.getFillRatio() << endl;
+    cout << img3 << endl;*/
+    
+    // Сложение матриц разного размера
+  /* Image<short> img1(2, 2, true);
+   Image<short> img2(3, 3, true);
+   cout << img1 << endl;
+   cout << img2 << endl;
+   Image<short> img3= img1+img2;
+    cout << img3.getFillRatio() << endl;
+   cout << img3 << endl;*/
+
+    //Вывод круга
+    /*Image<short> img2(100, 100, false);
+    img2.drawFilledCircle(50, 50, 30, 5);
+    img2.PixelImage(img2);*/
 
     return 0;
 };
