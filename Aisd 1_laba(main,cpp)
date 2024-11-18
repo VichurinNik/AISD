@@ -1,6 +1,47 @@
 #include"Image.h"
 #include<Windows.h>
 
+//Алгоритм Брезенхема
+template <typename T>
+void drawFilledCircle(int cx, int cy, int radius, T fillValue, Image<short>& img)
+{
+    int x = 0;
+    int y = radius;
+    int d = 3 - 2 * radius;
+
+    while (x <= y)
+    {
+        // Рисуем горизонтальные линии для заполнения внутренней части круга
+        drawHorizontalLine(cx - x, cy - y, 2 * x + 1, fillValue,img);
+        drawHorizontalLine(cx - x, cy + y, 2 * x + 1, fillValue,img);
+        drawHorizontalLine(cx - y, cy - x, 2 * y + 1, fillValue,img);
+        drawHorizontalLine(cx - y, cy + x, 2 * y + 1, fillValue,img);
+
+        if (d < 0)
+        {
+            d += 4 * x + 6;
+        }
+        else
+        {
+            d += 4 * (x - y) + 10;
+            y--;
+        }
+        x++;
+    }
+}
+
+// Функция для рисования горизонтальной линии
+template <typename T>
+void drawHorizontalLine(int x1, int y, int length, T value, Image<short>& img)
+{
+    for (int x = x1; x < x1 + length; ++x) {
+        /*setPixel(x, y, value);*/
+        img(y, x) = value;
+    }
+}
+
+
+//Вывод
 
 
 
@@ -36,9 +77,9 @@ int main() {
    cout << img3 << endl;*/
 
     //Вывод круга
-    /*Image<short> img2(100, 100, false);
-    img2.drawFilledCircle(50, 50, 30, 5);
-    img2.PixelImage(img2);*/
+    Image<short> img2(100, 100, false);
+    drawFilledCircle(50, 50, 30, 5, img2);
+    img2.PixelImage(img2);
 
     return 0;
 };
