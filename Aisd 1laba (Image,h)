@@ -15,15 +15,7 @@ private:
     size_t _height;   // Высота изображения
     T** data;
 
-    // Функция для рисования горизонтальной линии
-    void drawHorizontalLine(int x1, int y, int length, T value)
-    {
-        for (int x = x1; x < x1 + length; ++x) {
-            /*setPixel(x, y, value);*/
-            (*this)(y, x) = value;
-        }
-    }
-
+   
 public:
 
     Image(size_t width, size_t height, bool random_fill) : _width(width), _height(height)
@@ -199,7 +191,7 @@ public:
     }
 
     template <typename T>
-    Image<T>& operator+(const Image<T>& other)
+    Image<T>& operator+(const Image<T>& other) const
     {
         if (_width != other._width || _height != other._height)
         {
@@ -232,7 +224,7 @@ public:
         return *result;
     }
 
-   const Image<bool>& operator*(const Image<bool>& other) {
+  Image<bool>& operator*(const Image<bool>& other)  const {
         if (_width != other._width || _height != other._height)
         {
             throw runtime_error("Dimensions do not match");
@@ -249,7 +241,7 @@ public:
         return *result;
     }
 
-   const Image<bool>& operator+(const Image<bool>& other)
+   Image<bool>& operator+(const Image<bool>& other)  const
     {
         if (_width != other._width || _height != other._height)
         {
@@ -268,7 +260,7 @@ public:
     }
 
     // Операторы умножения и сложения изображения на константу
-   const Image<T>& operator*(T value) {
+   Image<T>& operator*(T value) const {
         Image<T>* result = new Image<T>(_width, _height);
         for (size_t i = 0; i < _height; ++i) {
             for (size_t j = 0; j < _width; ++j)
@@ -289,7 +281,7 @@ public:
         return *result;
     }
 
-   const Image<T>& operator+(T value) {
+   Image<T>& operator+(T value) const {
         Image<T>* result = new Image<T>(_width, _height);
         for (size_t i = 0; i < _height; ++i)
         {
@@ -334,33 +326,6 @@ public:
        return fillRatio;
    }
 
-    //Алгоритм Брезенхема
-    void drawFilledCircle(int cx, int cy, int radius, T fillValue)
-    {
-        int x = 0;
-        int y = radius;
-        int d = 3 - 2 * radius;
-
-        while (x <= y)
-        {
-            // Рисуем горизонтальные линии для заполнения внутренней части круга
-            drawHorizontalLine(cx - x, cy - y, 2 * x + 1, fillValue);
-            drawHorizontalLine(cx - x, cy + y, 2 * x + 1, fillValue);
-            drawHorizontalLine(cx - y, cy - x, 2 * y + 1, fillValue);
-            drawHorizontalLine(cx - y, cy + x, 2 * y + 1, fillValue);
-
-            if (d < 0)
-            {
-                d += 4 * x + 6;
-            }
-            else
-            {
-                d += 4 * (x - y) + 10;
-                y--;
-            }
-            x++;
-        }
-    }
 
     //Вывод
     T PixelImage(const Image img)
@@ -398,7 +363,3 @@ ostream& operator<<(ostream& stream, const Image<T> img)
     return stream;
 };
 
-        stream << '\n';
-    }
-    return stream;
-};
